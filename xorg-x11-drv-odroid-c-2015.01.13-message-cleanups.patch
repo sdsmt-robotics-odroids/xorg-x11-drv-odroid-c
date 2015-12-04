@@ -1,0 +1,382 @@
+diff -uNr a/src/mali_def.h b/src/mali_def.h
+--- a/src/mali_def.h	2015-01-13 19:23:42.000000000 -0800
++++ b/src/mali_def.h	2015-12-03 22:05:33.209934645 -0800
+@@ -58,7 +58,7 @@
+ 		             ##__VA_ARGS__); } while (0)
+ #define DEBUG_STR(nr, fmt, ...) \
+ 	do { if (nr <= MALI_DEBUG_LEVEL) \
+-			xf86Msg(X_WARNING, "Debug: " fmt "\n",\
++			xf86Msg(X_INFO, "Debug: " fmt "\n",\
+ 			        ##__VA_ARGS__); } while (0)
+ #else
+ #define TRACE_ENTER()
+diff -uNr a/src/mali_dri.c b/src/mali_dri.c
+--- a/src/mali_dri.c	2015-01-13 19:23:42.000000000 -0800
++++ b/src/mali_dri.c	2015-12-03 22:05:33.209934645 -0800
+@@ -72,7 +72,6 @@
+ 		privWindowPixmap = (PrivPixmap *)exaGetPixmapDriverPrivate(pWindowPixmap);
+ 	}
+ 
+-	// xf86DrvMsg( pScrn->scrnIndex, X_INFO, "Creating attachment %u around drawable %p (window pixmap %p)\n", attachment, pDraw, pScreen->GetWindowPixmap((WindowPtr)pDraw));
+ 	DEBUG_STR(1, "Creating attachment %u around drawable %p (window pixmap %p)\n", attachment, pDraw, pScreen->GetWindowPixmap((WindowPtr)pDraw));
+ 
+ 	buffer = calloc(1, sizeof * buffer);
+@@ -165,7 +164,6 @@
+ 
+ 	if (0 == buffer->pitch)
+ 	{
+-		//xf86DrvMsg( pScrn->scrnIndex, X_WARNING, "[%s:%d] Warning: Autocalculating pitch\n", __FUNCTION__, __LINE__ );
+ 		WARNING_MSG("Autocalculating pitch");
+ 		buffer->pitch = ((pPixmapToWrap->drawable.width * pPixmapToWrap->drawable.bitsPerPixel) + 7) / 8;
+ 	}
+@@ -180,7 +178,6 @@
+ 	ScreenPtr pScreen = pDraw->pScreen;
+ 	ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+ 
+-	//xf86DrvMsg( pScrn->scrnIndex, X_INFO, "Destroying attachment %d for drawable %p\n", buffer->attachment, pDraw);
+ 	DEBUG_STR(1, "Destroying attachment %d for drawable %p\n", buffer->attachment, pDraw);
+ 
+ 	if (NULL != buffer)
+@@ -299,12 +296,12 @@
+ 	{
+ 		if (front_privPixmap->mem_info->usize == back_privPixmap->mem_info->usize)
+ 		{
+-			DEBUG_STR(1, "EXCHANGING UMP ID 0x%x with 0x%x (%s)\n", ump_secure_id_get(front_privPixmap->mem_info->handle), ump_secure_id_get(back_privPixmap->mem_info->handle), dri2_complete_cmd == DRI2_EXCHANGE_COMPLETE ? "SWAP" : "FLIP");
++			DEBUG_STR(1, "EXCHANGING UMP ID 0x%x with 0x%x (%s)", ump_secure_id_get(front_privPixmap->mem_info->handle), ump_secure_id_get(back_privPixmap->mem_info->handle), dri2_complete_cmd == DRI2_EXCHANGE_COMPLETE ? "SWAP" : "FLIP");
+ 			exchange(front_privPixmap->mem_info, back_privPixmap->mem_info);
+ 		}
+ 		else
+ 		{
+-			DEBUG_STR(1, "EXCHANGING FAILED FOR UMP ID 0x%x size: %ld with 0x%x size (%ld)\n", ump_secure_id_get(front_privPixmap->mem_info->handle), front_privPixmap->mem_info->usize, ump_secure_id_get(back_privPixmap->mem_info->handle), back_privPixmap->mem_info->usize);
++			DEBUG_STR(1, "EXCHANGING FAILED FOR UMP ID 0x%x size: %ld with 0x%x size (%ld)", ump_secure_id_get(front_privPixmap->mem_info->handle), front_privPixmap->mem_info->usize, ump_secure_id_get(back_privPixmap->mem_info->handle), back_privPixmap->mem_info->usize);
+ 			return 0;
+ 		}
+ 	}
+@@ -323,13 +320,11 @@
+ 
+ 	if (ioctl(fb_lcd_fd, S3CFB_SET_VSYNC_INT, &interrupt) < 0)
+ 	{
+-		//xf86DrvMsg( pScrn->scrnIndex, X_WARNING, "[%s:%d] failed in S3CFB_SET_VSYNC_INT\n", __FUNCTION__, __LINE__ );
+ 		WARNING_MSG("failed in S3CFB_SET_VSYNC_INT");
+ 	}
+ 
+ 	if (ioctl(fb_lcd_fd, FBIO_WAITFORVSYNC, 0) < 0)
+ 	{
+-		//xf86DrvMsg( pScrn->scrnIndex, X_WARNING, "[%s:%d] failed in FBIO_WAITFORVSYNC\n", __FUNCTION__, __LINE__ );
+ 		WARNING_MSG("failed in FBIO_WAITFORVSYNC");
+ 	}
+ 
+@@ -337,7 +332,6 @@
+ 
+ 	if (ioctl(fb_lcd_fd, S3CFB_SET_VSYNC_INT, &interrupt) < 0)
+ 	{
+-		//xf86DrvMsg( pScrn->scrnIndex, X_WARNING, "[%s:%d] failed in S3CFB_SET_VSYNC_INT\n", __FUNCTION__, __LINE__ );
+ 		WARNING_MSG("failed in S3CFB_SET_VSYNC_INT");
+ 	}
+ 
+@@ -409,11 +403,10 @@
+ 
+ 		unsigned int line_length = fPtr->fb_lcd_var.xres * fPtr->fb_lcd_var.bits_per_pixel / 8;
+ 		fPtr->fb_lcd_var.yoffset = back_pixmap_priv->mem_info->offset / line_length;
+-		DEBUG_STR(1, "Flipping! ofs %d\n", fPtr->fb_lcd_var.yoffset);
++		DEBUG_STR(1, "Flipping! ofs %d", fPtr->fb_lcd_var.yoffset);
+ 
+ 		if (ioctl(fPtr->fb_lcd_fd, FBIOPAN_DISPLAY, &fPtr->fb_lcd_var) == -1)
+ 		{
+-			//xf86DrvMsg( pScrn->scrnIndex, X_WARNING, "[%s:%d] failed in FBIOPAN_DISPLAY\n", __FUNCTION__, __LINE__ );
+ 			WARNING_MSG("failed in FBIOPAN_DISPLAY");
+ 		}
+ 
+@@ -451,7 +444,7 @@
+ 
+ 		if (exchange_buffers(pDraw, front, back, dri2_complete_cmd))
+ 		{
+-			DEBUG_STR(1, "Swapping! front_pixmap->drawable.width %d, front_pixmap->drawable.height %d, pDraw->width %d, pDraw->height %d\n", front_pixmap->drawable.width, front_pixmap->drawable.height, pDraw->width, pDraw->height);
++			DEBUG_STR(1, "Swapping! front_pixmap->drawable.width %d, front_pixmap->drawable.height %d, pDraw->width %d, pDraw->height %d", front_pixmap->drawable.width, front_pixmap->drawable.height, pDraw->width, pDraw->height);
+ 			box.x1 = 0;
+ 			box.y1 = 0;
+ 			box.x2 = pDraw->width;
+@@ -518,13 +511,11 @@
+ 
+ 	if (dri2_minor < 1)
+ 	{
+-		//xf86DrvMsg( pScrn->scrnIndex, X_ERROR, "%s requires DRI2 module version 1.1.0 or later\n", __func__);
+ 		ERROR_MSG("%s requires DRI2 module version 1.1.0 or later\n", __func__);
+ 		return FALSE;
+ 	}
+ 
+-	xf86DrvMsg(pScrn->scrnIndex, X_INFO, "DRI2 version: %i.%i\n", dri2_major, dri2_minor);
+-	INFO_MSG("DRI2 version: %i.%i\n", dri2_major, dri2_minor);
++	INFO_MSG("DRI2 version: %i.%i", dri2_major, dri2_minor);
+ 
+ 
+ 	/* extract deviceName */
+@@ -546,7 +537,6 @@
+ 
+ 	if (i == DRM_MAX_MINOR)
+ 	{
+-		//xf86DrvMsg( pScrn->scrnIndex, X_ERROR, "%s failed to open drm device\n", __func__ );
+ 		ERROR_MSG("%s failed to open drm device\n", __func__);
+ 		return FALSE;
+ 	}
+diff -uNr a/src/mali_exa.c b/src/mali_exa.c
+--- a/src/mali_exa.c	2015-01-13 19:23:42.000000000 -0800
++++ b/src/mali_exa.c	2015-12-03 22:05:33.209934645 -0800
+@@ -161,7 +161,6 @@
+ 		ump_secure_id ump_id = UMP_INVALID_SECURE_ID;
+ 
+ 		privPixmap->isFrameBuffer = TRUE;
+-
+ 		mem_info = privPixmap->mem_info;
+ 
+ 		if (mem_info)
+@@ -182,12 +181,12 @@
+ 		if (!offset)
+ 		{
+ 			(void)ioctl(fPtr->fb_lcd_fd, GET_UMP_SECURE_ID_BUF1, &ump_id);
+-			ERROR_MSG("GET_UMP_SECURE_ID_BUF1 returned 0x%x offset: %i virt address: %p fb_virt: %p\n", ump_id, offset, pPixData, fPtr->fbmem);
++			DEBUG_STR(1, "GET_UMP_SECURE_ID_BUF1 returned 0x%x offset: %i virt address: %p fb_virt: %p", ump_id, offset, pPixData, fPtr->fbmem);
+ 		}
+ 		else
+ 		{
+ 			(void)ioctl(fPtr->fb_lcd_fd, GET_UMP_SECURE_ID_BUF2, &ump_id);
+-			ERROR_MSG("GET_UMP_SECURE_ID_BUF2 returned 0x%x offset: %i virt address: %p fb_virt: %p\n", ump_id, offset, pPixData, fPtr->fbmem);
++			DEBUG_STR(1, "GET_UMP_SECURE_ID_BUF2 returned 0x%x offset: %i virt address: %p fb_virt: %p", ump_id, offset, pPixData, fPtr->fbmem);
+ 		}
+ 
+ 		if (UMP_INVALID_SECURE_ID == ump_id)
+@@ -246,7 +245,7 @@
+ 			offset = 0;
+ 		}
+ 
+-		INFO_MSG("Creating FRAMEBUFFER pixmap %p at offset %lu, privPixmap=%p\n", pPixmap, privPixmap->mem_info->offset, privPixmap);
++		INFO_MSG("Creating FRAMEBUFFER pixmap %p at offset %lu, privPixmap=%p", pPixmap, privPixmap->mem_info->offset, privPixmap);
+ 
+ 		return TRUE;
+ 	}
+diff -uNr a/src/mali_fbdev.c b/src/mali_fbdev.c
+--- a/src/mali_fbdev.c	2015-01-13 19:23:42.000000000 -0800
++++ b/src/mali_fbdev.c	2015-12-03 22:06:24.020389416 -0800
+@@ -210,7 +210,7 @@
+     aml_hwc_addr_t hwc;
+     hwc.addr = (uintptr_t)&pixeldata[0];
+     tmp = (uintptr_t)&hwc;
+-    ERROR_STR("aml_hw_cursor_load_image hwc.add is 0x%x, tmp is 0x%x\n", hwc.addr, tmp);
++    DEBUG_STR(1, "Loading cursor image, hwc.add is 0x%x, tmp is 0x%x\n", hwc.addr, tmp);
+     return ioctl(ctx->fd_disp, FBIOPUT_OSD2_CURSOR_DATA, &tmp);
+ }
+ 
+@@ -234,7 +234,7 @@
+ 
+ static void SetCursorColors(ScrnInfoPtr pScrn, int bg, int fg)
+ {
+-    ERROR_STR("SetCurosrColors bg is 0x%x, fg is 0x%x\n",bg, fg);
++    DEBUG_STR(1, "SetCurosrColors bg is 0x%x, fg is 0x%x",bg, fg);
+     aml_disp_t *disp =MALI_DISP(pScrn);
+     bg |= 0xff000000;
+     fg |= 0xff000000;
+@@ -263,7 +263,7 @@
+ 
+ static void LoadCursorImage(ScrnInfoPtr pScrn, unsigned char *bits)
+ {
+-    ERROR_STR("LoadCursorImage\n");
++    DEBUG_STR(1, "Loading cursor image");
+     aml_disp_t *disp = MALI_DISP(pScrn);
+     int image_width = 32;
+     int image_height = 32;
+@@ -326,7 +326,7 @@
+         cursor_image = calloc(32 * 32, 4);
+ 	}
+ 
+-    ERROR_STR("LoadCursorARGB width is %d, height is %d\n", pCurs->bits->width, pCurs->bits->height);
++    DEBUG_STR(1, "LoadCursorARGB width is %d, height is %d\n", pCurs->bits->width, pCurs->bits->height);
+     {
+         uint32_t *argb = (uint32_t *)pCurs->bits->argb;
+ 
+@@ -352,15 +352,14 @@
+     ScrnInfoPtr pScrn = xf86Screens[pScreen->myNum];
+     aml_disp_t *disp = MALI_DISP(pScrn);
+     aml_hwcursor_t *private;
+-    ERROR_STR("aml_hwcursor_init\n");
++    DEBUG_STR(1, "Initializing hardware cursor");
+     if (!disp)
+         return NULL;
+ 
+-    ERROR_STR("aml_hwcursor_init\n");
+     InfoPtr = xf86CreateCursorInfoRec();
+     if(!InfoPtr)
+     {
+-        ERROR_STR("aml_hwcursor_init: xf86CreateCursorInfoRec() failed\n");
++        ERROR_MSG("xf86CreateCursorInfoRec() failed\n");
+         return NULL;
+     }
+ 
+@@ -378,14 +377,14 @@
+     InfoPtr->LoadCursorARGB = LoadCursorARGB;
+ 
+     if (!xf86InitCursor(pScreen, InfoPtr)) {
+-        ERROR_STR("aml_hwcursor_init: xf86InitCursor(pScreen, InfoPtr) failed\n");
++        ERROR_MSG("xf86InitCursor(pScreen, InfoPtr) failed\n");
+         xf86DestroyCursorInfoRec(InfoPtr);
+         return NULL;
+     }
+ 
+     private = calloc(1, sizeof(aml_hwcursor_t));
+     if (!private) {
+-        ERROR_STR("aml_hwcursor_init: calloc failed\n");
++        ERROR_MSG("calloc failed\n");
+         xf86DestroyCursorInfoRec(InfoPtr);
+         return NULL;
+     }
+@@ -405,14 +404,14 @@
+ 
+ aml_disp_t *aml_disp_init(void)
+ {
+-    ERROR_STR("enter to aml_disp_init\n");
++    DEBUG_STR(1, "Initializing AMLogic display");
+     aml_disp_t *ctx = calloc(sizeof(aml_disp_t), 1);
+ 
+     ctx->fd_disp = open("/dev/fb1", O_RDWR);
+ 
+     /* maybe it's even not a aml hardware */
+     if (ctx->fd_disp < 0) {
+-        ERROR_STR("failed to aml_disp_init fd_disp < 0\n");
++        ERROR_STR("failed to aml_disp_init fd_disp < 0");
+         free(ctx);
+         return NULL;
+     }
+@@ -420,7 +419,7 @@
+     ctx->cursor_enabled = 0;
+     ctx->cursor_x = -1;
+     ctx->cursor_y = -1;
+-    ERROR_STR("success to aml_disp_init\n");
++    DEBUG_STR(1, "AMLogic display initialized successfully");
+     return ctx;
+ }
+ 
+@@ -442,7 +441,7 @@
+ {
+ 	static Bool setupDone = FALSE;
+ 
+-	ERROR_STR("MaliSetup");
++	DEBUG_STR(1, "Setting up module");
+ 
+ 	IGNORE(opts);
+ 	IGNORE(errmin);
+@@ -530,7 +529,7 @@
+ 
+ static const OptionInfoRec *MaliAvailableOptions(int chipid, int busid)
+ {
+-	ERROR_STR("MaliAvailableOptions");
++	DEBUG_STR(1, "MaliAvailableOptions");
+ 
+ 	IGNORE(chipid);
+ 	IGNORE(busid);
+@@ -540,7 +539,7 @@
+ 
+ static void MaliIdentify(int flags)
+ {
+-	ERROR_STR("MaliIdentify");
++	DEBUG_STR(1, "Identifying");
+ 
+ 	IGNORE(flags);
+ 
+@@ -553,7 +552,7 @@
+ 	xf86CrtcConfigPtr xf86_config = XF86_CRTC_CONFIG_PTR(pScrn);
+ 	int pitch, i;
+ 
+-	INFO_MSG("%s: width = %d height = %d\n", __FUNCTION__, width, height);
++	INFO_MSG("%s: width = %d height = %d", __FUNCTION__, width, height);
+ 
+ 	/* we currently need EXA for this to work */
+ 	if (fPtr->exa == NULL)
+@@ -880,7 +879,7 @@
+ {
+ 	int fd;
+ 
+-	ERROR_STR("MaliHWProbe");
++	DEBUG_STR(1, "Probing for hardware");
+ 
+ 	if ((fd = mali_open(-1, device, namep)) == -1)
+ 	{
+@@ -1026,7 +1025,7 @@
+ void MaliHWDPMSSet(ScrnInfoPtr pScrn, int mode, int flags)
+ {
+ 	MaliHWPtr fPtr = MALIHWPTR(pScrn);
+-    aml_disp_t *disp = MALI_DISP(pScrn);
++	aml_disp_t *disp = MALI_DISP(pScrn);
+ 	unsigned long fbmode;
+ 
+ 	TRACE_ENTER();
+@@ -1077,7 +1076,7 @@
+ 	ScrnInfoPtr pScrn;
+ 	GDevPtr *devSections;
+ 
+-	ERROR_STR("MaliProbe");
++	DEBUG_STR(1, "Probing for devices");
+ 
+ 	if (flags & PROBE_DETECT)
+ 	{
+@@ -1116,7 +1115,7 @@
+ 				pScrn->LeaveVT       = MaliHWLeaveVT;
+ 				pScrn->ValidMode     = MaliHWValidMode;
+ 
+-				INFO_MSG("using %s\n", dev ? dev : "default device");
++				INFO_MSG("using %s", dev ? dev : "default device");
+ 			}
+ 		}
+ 	}
+@@ -1323,7 +1322,7 @@
+ 	}
+ 
+ 	fPtr->drm_fd = global_drm_fd;
+-	ERROR_MSG("%s DRM OPEN (fd: 0x%x)\n", __func__, fPtr->drm_fd);
++	DEBUG_STR(1, "%s DRM OPEN (fd: 0x%x)", __func__, fPtr->drm_fd);
+ 
+ 	sv.drm_di_major = 1;
+ 	sv.drm_di_minor = 1;
+@@ -1433,7 +1432,7 @@
+ 	pScrn->chipset   = "mali";
+ 	pScrn->videoRam  = MaliHWGetVidmem(pScrn);
+ 
+-	INFO_MSG("hardware: %s (video memory: %dkB)\n", MaliHWGetName(pScrn), pScrn->videoRam / 1024);
++	INFO_MSG("hardware: %s (video memory: %dkB)", MaliHWGetName(pScrn), pScrn->videoRam / 1024);
+ 
+ 	/* handle options */
+ 	xf86CollectOptions(pScrn, NULL);
+@@ -1653,12 +1652,12 @@
+ 
+ 	if (maliSetupExa(pScreen, fPtr->exa))
+ 	{
+-		WARNING_MSG("Initializing EXA Driver!");
++		INFO_MSG("Initializing EXA Driver!");
+ 		exaDriverInit(pScreen, fPtr->exa);
+ 	}
+ 	else
+ 	{
+-		WARNING_MSG("Failed allocating EXA Driver!");
++		ERROR_MSG("Failed allocating EXA Driver!");
+ 		free(fPtr->exa);
+ 		fPtr->exa = NULL;
+ 	}
+diff -uNr a/src/mali_lcd.c b/src/mali_lcd.c
+--- a/src/mali_lcd.c	2015-01-13 19:23:42.000000000 -0800
++++ b/src/mali_lcd.c	2015-12-03 22:05:33.219934734 -0800
+@@ -187,7 +187,7 @@
+ 
+ 	if (ioctl(fPtr->fb_lcd_fd, FBIOGET_VSCREENINFO, &fPtr->fb_lcd_var) < 0)
+ 	{
+-		INFO_MSG("Unable to get VSCREENINFO");
++		ERROR_MSG("Unable to get VSCREENINFO");
+ 	}
+ 
+ 	fPtr->fb_lcd_var.xres = mode->HDisplay;
+@@ -198,7 +198,7 @@
+ 
+ 	if (ioctl(fPtr->fb_lcd_fd, FBIOPUT_VSCREENINFO, &fPtr->fb_lcd_var) < 0)
+ 	{
+-		INFO_MSG("Unable to set mode!");
++		ERROR_MSG("Unable to set mode!");
+ 	}
+ 
+ }
