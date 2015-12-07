@@ -3,7 +3,7 @@
 
 Name:           xorg-x11-drv-odroid-c
 Version:        2015.01.13
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        X.org Mali video driver for ODROID-C
 
 Group:          User Interface/X Hardware Support
@@ -42,5 +42,8 @@ install -p -m0644 -D src/xorg.conf %{buildroot}%{_sysconfdir}/X11/xorg.conf.d/99
 %config(noreplace) %{_sysconfdir}/X11/xorg.conf.d/99-odroid-c-mali.conf
 
 %changelog
+* Sun Dec 06 2015 Scott K Logan <logans@cottsay.net> - 2015.01.13-2
+- More message cleanups
+
 * Wed Dec 02 2015 Scott K Logan <logans@cottsay.net> - 2015.01.13-1
 - Initial package

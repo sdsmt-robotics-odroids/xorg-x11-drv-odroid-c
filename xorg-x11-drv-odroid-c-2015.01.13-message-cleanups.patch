@@ -1,6 +1,6 @@
 diff -uNr a/src/mali_def.h b/src/mali_def.h
 --- a/src/mali_def.h	2015-01-13 19:23:42.000000000 -0800
-+++ b/src/mali_def.h	2015-12-03 22:05:33.209934645 -0800
++++ b/src/mali_def.h	2015-12-06 20:37:59.739341584 -0800
 @@ -58,7 +58,7 @@
  		             ##__VA_ARGS__); } while (0)
  #define DEBUG_STR(nr, fmt, ...) \
@@ -12,7 +12,7 @@ diff -uNr a/src/mali_def.h b/src/mali_def.h
  #define TRACE_ENTER()
 diff -uNr a/src/mali_dri.c b/src/mali_dri.c
 --- a/src/mali_dri.c	2015-01-13 19:23:42.000000000 -0800
-+++ b/src/mali_dri.c	2015-12-03 22:05:33.209934645 -0800
++++ b/src/mali_dri.c	2015-12-06 20:37:59.740341504 -0800
 @@ -72,7 +72,6 @@
  		privWindowPixmap = (PrivPixmap *)exaGetPixmapDriverPrivate(pWindowPixmap);
  	}
@@ -121,7 +121,7 @@ diff -uNr a/src/mali_dri.c b/src/mali_dri.c
  	}
 diff -uNr a/src/mali_exa.c b/src/mali_exa.c
 --- a/src/mali_exa.c	2015-01-13 19:23:42.000000000 -0800
-+++ b/src/mali_exa.c	2015-12-03 22:05:33.209934645 -0800
++++ b/src/mali_exa.c	2015-12-06 20:37:59.741341425 -0800
 @@ -161,7 +161,6 @@
  		ump_secure_id ump_id = UMP_INVALID_SECURE_ID;
  
@@ -156,7 +156,7 @@ diff -uNr a/src/mali_exa.c b/src/mali_exa.c
  	}
 diff -uNr a/src/mali_fbdev.c b/src/mali_fbdev.c
 --- a/src/mali_fbdev.c	2015-01-13 19:23:42.000000000 -0800
-+++ b/src/mali_fbdev.c	2015-12-03 22:06:24.020389416 -0800
++++ b/src/mali_fbdev.c	2015-12-06 20:39:51.816470491 -0800
 @@ -210,7 +210,7 @@
      aml_hwc_addr_t hwc;
      hwc.addr = (uintptr_t)&pixeldata[0];
@@ -299,7 +299,16 @@ diff -uNr a/src/mali_fbdev.c b/src/mali_fbdev.c
  
  	if ((fd = mali_open(-1, device, namep)) == -1)
  	{
-@@ -1026,7 +1025,7 @@
+@@ -928,8 +927,6 @@
+ 	MaliHWPtr fPtr = MALIHWPTR(pScrn);
+ 	unsigned long unblank;
+ 
+-	TRACE_ENTER();
+-
+ 	if (!pScrn->vtSema)
+ 	{
+ 		return TRUE;
+@@ -1026,7 +1023,7 @@
  void MaliHWDPMSSet(ScrnInfoPtr pScrn, int mode, int flags)
  {
  	MaliHWPtr fPtr = MALIHWPTR(pScrn);
@@ -308,7 +317,7 @@ diff -uNr a/src/mali_fbdev.c b/src/mali_fbdev.c
  	unsigned long fbmode;
  
  	TRACE_ENTER();
-@@ -1077,7 +1076,7 @@
+@@ -1077,7 +1074,7 @@
  	ScrnInfoPtr pScrn;
  	GDevPtr *devSections;
  
@@ -317,7 +326,7 @@ diff -uNr a/src/mali_fbdev.c b/src/mali_fbdev.c
  
  	if (flags & PROBE_DETECT)
  	{
-@@ -1116,7 +1115,7 @@
+@@ -1116,7 +1113,7 @@
  				pScrn->LeaveVT       = MaliHWLeaveVT;
  				pScrn->ValidMode     = MaliHWValidMode;
  
@@ -326,7 +335,7 @@ diff -uNr a/src/mali_fbdev.c b/src/mali_fbdev.c
  			}
  		}
  	}
-@@ -1323,7 +1322,7 @@
+@@ -1323,7 +1320,7 @@
  	}
  
  	fPtr->drm_fd = global_drm_fd;
@@ -335,7 +344,7 @@ diff -uNr a/src/mali_fbdev.c b/src/mali_fbdev.c
  
  	sv.drm_di_major = 1;
  	sv.drm_di_minor = 1;
-@@ -1433,7 +1432,7 @@
+@@ -1433,7 +1430,7 @@
  	pScrn->chipset   = "mali";
  	pScrn->videoRam  = MaliHWGetVidmem(pScrn);
  
@@ -344,7 +353,7 @@ diff -uNr a/src/mali_fbdev.c b/src/mali_fbdev.c
  
  	/* handle options */
  	xf86CollectOptions(pScrn, NULL);
-@@ -1653,12 +1652,12 @@
+@@ -1653,12 +1650,12 @@
  
  	if (maliSetupExa(pScreen, fPtr->exa))
  	{
@@ -361,7 +370,7 @@ diff -uNr a/src/mali_fbdev.c b/src/mali_fbdev.c
  	}
 diff -uNr a/src/mali_lcd.c b/src/mali_lcd.c
 --- a/src/mali_lcd.c	2015-01-13 19:23:42.000000000 -0800
-+++ b/src/mali_lcd.c	2015-12-03 22:05:33.219934734 -0800
++++ b/src/mali_lcd.c	2015-12-06 20:37:59.742341346 -0800
 @@ -187,7 +187,7 @@
  
  	if (ioctl(fPtr->fb_lcd_fd, FBIOGET_VSCREENINFO, &fPtr->fb_lcd_var) < 0)
